@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Audit Inspector - StoreMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-white text-black font-mono p-8 max-w-6xl mx-auto">
+    <div class="border-b-2 border-black pb-4 mb-6 flex justify-between items-end">
+        <div>
+            <h1 class="text-2xl font-black tracking-tighter">STOREMS_DB_AUDIT // SUPABASE</h1>
+            <p class="text-xs text-zinc-600">PostgreSQL Relational Schema Inspector</p>
+        </div>
+        <a href="index.html" class="border border-black px-3 py-1 text-xs font-bold hover:bg-black hover:text-white transition">← BACK TO APP</a>
+    </div>
+
+    <div class="space-y-8">
+        <section>
+            <h2 class="text-sm font-bold uppercase bg-black text-white px-2 py-1 inline-block mb-2">Table: products</h2>
+            <div id="table-products" class="overflow-x-auto border border-black text-xs"></div>
+        </section>
+
+        <section>
+            <h2 class="text-sm font-bold uppercase bg-black text-white px-2 py-1 inline-block mb-2">Table: sales</h2>
+            <div id="table-sales" class="overflow-x-auto border border-black text-xs"></div>
+        </section>
+
+        <section>
+            <h2 class="text-sm font-bold uppercase bg-black text-white px-2 py-1 inline-block mb-2">Table: users</h2>
+            <div id="table-users" class="overflow-x-auto border border-black text-xs"></div>
+        </section>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://nnigtowruubvfuwxermo.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_2qIAef096E-hfQgKF1HHBg_GPImBtIq';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function loadAuditData() {
+            // Products
+            const { data: prods } = await _supabase.from('products').select('*');
+            renderTable('table-products', prods);
+
+            // Sales
+            const { data: sales } = await _supabase.from('sales').select('*');
+            renderTable('table-sales', sales);
+
+            // Users
+            const { data: users } = await _supabase.from('users').select('*');
+            renderTable('table-users', users);
+        }
+
+        function renderTable(containerId, rows) {
+            const container = document.getElementById(containerId);
+            if (!rows || rows.length === 0) {
+                container.innerHTML = `<p class="p-2 text-zinc-500">No data found.</p>`;
+                return;
+            }
+
+            const keys = Object.keys(rows[0]);
+            let html = `<table class="w-full border-collapse text-left"><thead><tr class="bg-zinc-200 border-b border-black">`;
+            keys.forEach(k => html += `<th class="p-2 border-r border-black">${k}</th>`);
+            html += `</tr></thead><tbody>`;
+
+            rows.forEach(r => {
+                html += `<tr class="border-b border-zinc-300 hover:bg-zinc-100">`;
+                keys.forEach(k => html += `<td class="p-2 border-r border-zinc-300">${r[k] !== null ? r[k] : ''}</td>`);
+                html += `</tr>`;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        loadAuditData();
+    </script>
+</body>
+</html>
